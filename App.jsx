@@ -8,7 +8,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import Location from './components/Location';
+import Location from './src/components/Location';
 
 function HomeScreen() {
   return (
