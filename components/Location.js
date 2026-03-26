@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,52 @@ import {
   PermissionsAndroid,
   Platform,
   StyleSheet,
+  Image,
+  TouchableOpacity,
+  Linking,
 } from 'react-native';
+
 import Geolocation from 'react-native-geolocation-service';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Camera, useCameraDevice} from 'react-native-vision-camera';
 
 const App = () => {
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState('');
+  const [photo, setPhoto] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showCamera, setShowCamera] = useState(false);
 
-  // Permission
+  const cameraRef = useRef(null);
+  const device = useCameraDevice('front')
+
+  useEffect(() => {
+    getLocation();
+  }, []);
+
+  // 📸 CAMERA PERMISSION (FIXED)
+  const requestCameraPermission = async () => {
+    let status = await Camera.getCameraPermissionStatus();
+    console.log('Initial camera status:', status);
+
+    if (status === 'authorized') return true;
+
+    if (status === 'denied' || status === 'restricted') {
+      const newStatus = await Camera.requestCameraPermission();
+      console.log('Requested status:', newStatus);
+      return newStatus === 'authorized';
+    }
+
+    if (status === 'not-determined') {
+      const newStatus = await Camera.requestCameraPermission();
+      console.log('First time request:', newStatus);
+      return newStatus === 'authorized';
+    }
+
+    return false;
+  };
+
+  // 📍 LOCATION PERMISSION
   const requestLocationPermission = async () => {
     if (Platform.OS !== 'android') return true;
 
@@ -25,80 +62,115 @@ const App = () => {
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   };
 
-  // 🔥 OpenStreetMap reverse geocoding
+  // 🌍 ADDRESS
   const getAddressFromCoords = async (lat, lon) => {
     try {
-      const response = await fetch(
+      const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`,
-        {
-          headers: {
-            'User-Agent': 'ReactNativeApp', // required by Nominatim
-          },
-        },
+        {headers: {'User-Agent': 'ReactNativeApp'}},
       );
 
-      const data = await response.json();
-
-      if (data && data.display_name) {
-        setAddress(data.display_name);
-      } else {
-        setAddress('Address not found');
-      }
-    } catch (error) {
-      console.log(error);
+      const data = await res.json();
+      setAddress(data?.display_name || 'Address not found');
+    } catch {
       setAddress('Error fetching address');
     }
   };
 
-  // Get location
+  // 📍 GET LOCATION
   const getLocation = async () => {
-    setErrorMsg('');
-    setAddress('');
-    setLocation(null);
-
     const hasPermission = await requestLocationPermission();
-
-    if (!hasPermission) {
-      setErrorMsg('Permission denied');
-      return;
-    }
+    if (!hasPermission) return;
 
     Geolocation.getCurrentPosition(
-      async (position) => {
-        const {latitude, longitude} = position.coords;
-
+      async pos => {
+        const {latitude, longitude} = pos.coords;
         setLocation({latitude, longitude});
-
-        // 🔥 Convert to address
         await getAddressFromCoords(latitude, longitude);
       },
-      (error) => {
-        setErrorMsg(error.message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 10000,
-      },
+      err => setErrorMsg(err.message),
+      {enableHighAccuracy: true},
     );
   };
 
+  const openCamera = async () => {
+    setShowCamera(true);
+  };
+
+  // 📷 TAKE PHOTO
+  const takePhoto = async () => {
+    try {
+      const photo = await cameraRef.current.takePhoto();
+      setPhoto('file://' + photo.path);
+      setShowCamera(false);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  // ✅ SAVE ATTENDANCE
+  const markAttendance = async () => {
+    if (!photo || !location) {
+      alert('Capture photo & location first');
+      return;
+    }
+
+    const record = {
+      date: new Date().toISOString(),
+      location,
+      address,
+      photo,
+    };
+
+    let data = await AsyncStorage.getItem('attendance');
+    let arr = data ? JSON.parse(data) : [];
+
+    arr.push(record);
+    await AsyncStorage.setItem('attendance', JSON.stringify(arr));
+
+    alert('✅ Attendance marked!');
+  };
+
+  if (showCamera) {
+    if (!device) {
+      return (
+        <View style={styles.center}>
+          <Text>Loading camera...</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={{flex: 1}}>
+        <Camera
+          ref={cameraRef}
+          style={StyleSheet.absoluteFill}
+          device={device}
+          isActive={true}
+          photo={true}
+        />
+
+        <TouchableOpacity style={styles.captureBtn} onPress={takePhoto}>
+          <Text style={{color: '#fff'}}>CAPTURE</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // 📱 MAIN UI
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>📍 OSM Location → Address</Text>
+      <Text style={styles.title}>📸 Attendance App</Text>
 
-      <Button title="Get Location" onPress={getLocation} />
+      {address ? <Text style={styles.address}>📌 {address}</Text> : null}
 
-      {location && (
-        <View style={styles.result}>
-          <Text>Latitude: {location.latitude}</Text>
-          <Text>Longitude: {location.longitude}</Text>
-        </View>
-      )}
+      <TouchableOpacity onPress={openCamera} style={styles.btn}>
+        <Text style={styles.btnText}>📸 Open Camera</Text>
+      </TouchableOpacity>
 
-      {address ? (
-        <Text style={styles.address}>📌 {address}</Text>
-      ) : null}
+      {photo && <Image source={{uri: photo}} style={styles.image} />}
+
+      <Button title="✅ Mark Attendance" onPress={markAttendance} />
 
       {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
     </View>
@@ -114,19 +186,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  title: {
-    fontSize: 20,
-    marginBottom: 20,
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  result: {
-    marginTop: 20,
+  title: {fontSize: 20, marginBottom: 20},
+  address: {textAlign: 'center'},
+  image: {width: 200, height: 200, marginVertical: 10},
+
+  btn: {
+    marginTop: 10,
+    backgroundColor: '#007bff',
+    padding: 12,
+    borderRadius: 8,
   },
-  address: {
-    marginTop: 20,
-    textAlign: 'center',
+  btnText: {color: '#fff'},
+
+  captureBtn: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    backgroundColor: 'black',
+    padding: 15,
+    borderRadius: 10,
   },
-  error: {
-    marginTop: 20,
-    color: 'red',
-  },
+
+  error: {color: 'red'},
 });

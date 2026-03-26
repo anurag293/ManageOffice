@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, } from 'react-native-safe-area-context';
 
+
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
