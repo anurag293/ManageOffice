@@ -23,7 +23,7 @@ const App = () => {
   const [showCamera, setShowCamera] = useState(false);
 
   const cameraRef = useRef(null);
-  const device = useCameraDevice('front')
+  const device = useCameraDevice('front');
 
   useEffect(() => {
     getLocation();
@@ -31,24 +31,16 @@ const App = () => {
 
   // 📸 CAMERA PERMISSION (FIXED)
   const requestCameraPermission = async () => {
-    let status = await Camera.getCameraPermissionStatus();
-    console.log('Initial camera status:', status);
+    const status = await Camera.requestCameraPermission();
+    console.log('Camera permission:', status);
 
-    if (status === 'authorized') return true;
-
-    if (status === 'denied' || status === 'restricted') {
-      const newStatus = await Camera.requestCameraPermission();
-      console.log('Requested status:', newStatus);
-      return newStatus === 'authorized';
+    if (status === 'denied') {
+      alert('Camera permission denied. Please enable from settings.');
+      Linking.openSettings();
+      return false;
     }
 
-    if (status === 'not-determined') {
-      const newStatus = await Camera.requestCameraPermission();
-      console.log('First time request:', newStatus);
-      return newStatus === 'authorized';
-    }
-
-    return false;
+    return status === 'authorized';
   };
 
   // 📍 LOCATION PERMISSION
@@ -62,7 +54,7 @@ const App = () => {
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   };
 
-  // 🌍 ADDRESS
+  // 🌍 GET ADDRESS FROM COORDS
   const getAddressFromCoords = async (lat, lon) => {
     try {
       const res = await fetch(
@@ -93,8 +85,14 @@ const App = () => {
     );
   };
 
+  // 📸 OPEN CAMERA (FIXED)
   const openCamera = async () => {
+    const granted = await requestCameraPermission();
+
+    if (granted){
     setShowCamera(true);
+    }
+
   };
 
   // 📷 TAKE PHOTO
@@ -131,6 +129,7 @@ const App = () => {
     alert('✅ Attendance marked!');
   };
 
+  // 📸 CAMERA SCREEN
   if (showCamera) {
     if (!device) {
       return (
@@ -170,7 +169,9 @@ const App = () => {
 
       {photo && <Image source={{uri: photo}} style={styles.image} />}
 
-      <Button title="✅ Mark Attendance" onPress={markAttendance} />
+      <TouchableOpacity onPress={markAttendance} style={styles.btn}>
+        <Text style={styles.btnText}>Submit</Text>
+      </TouchableOpacity>
 
       {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
     </View>

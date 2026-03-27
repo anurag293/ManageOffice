@@ -1,12 +1,16 @@
 import React from 'react';
-import { StatusBar, StyleSheet, useColorScheme, View, Text } from 'react-native';
 import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+  StatusBar,
+  StyleSheet,
+  useColorScheme,
+  View,
+  Text,
+  Image,
+} from 'react-native';
 
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import Location from './src/components/Location';
 
@@ -26,7 +30,7 @@ function ProfileScreen() {
   );
 }
 
-const Tab = createBottomTabNavigator();
+const Drawer = createDrawerNavigator();
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -35,27 +39,58 @@ function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <AppTabs />
+        <AppDrawer />
       </NavigationContainer>
     </SafeAreaProvider>
   );
 }
 
-function AppTabs() {
-  const safeAreaInsets = useSafeAreaInsets();
-
+function AppDrawer() {
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
+    <Drawer.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: true,
+
+        drawerStyle: {
+          backgroundColor: 'black',
+        },
+
+        drawerActiveTintColor: '#fff',
+        drawerInactiveTintColor: 'gray',
+
+        drawerIcon: ({ size }) => {
+          let icon;
+
+          if (route.name === 'Home') {
+            icon = require('./src/assets/home-icon.png');
+          } else if (route.name === 'Attendance') {
+            icon = require('./src/assets/attendance-icon.png');
+          } else if (route.name === 'Profile') {
+            icon = require('./src/assets/profile-icon.png');
+          }
+
+          return (
+            <Image
+              source={icon}
+              style={{
+                width: size,
+                height: size,
+                resizeMode: 'contain',
+                tintColor: 'white',
+              }}
+            />
+          );
+        },
+      })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Attendance" component={Location} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
-    </Tab.Navigator>
+      <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="Attendance" component={Location} />
+      <Drawer.Screen name="Profile" component={ProfileScreen} />
+    </Drawer.Navigator>
   );
 }
+
+export default App;
 
 const styles = StyleSheet.create({
   center: {
@@ -64,5 +99,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
-export default App;
