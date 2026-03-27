@@ -4,87 +4,121 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
+  Image,
+  ScrollView,
 } from 'react-native';
-import { SafeAreaProvider, } from 'react-native-safe-area-context';
 
-
-const { width } = Dimensions.get('window');
-
-export default function HomeScreen() {
+function HomeScreen({ navigation }) {
   return (
-    <SafeAreaProvider style={styles.container}>
-    
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Home</Text>
+    <ScrollView style={styles.container}>
+
+      {/* ATTENDANCE CARD */}
+      <View style={[styles.card, styles.attendanceCard]}>
+        <View style={styles.row}>
+          <Image
+            source={require('../assets/attendance-icon.png')}
+            style={styles.cardIcon}
+          />
+
+          <View>
+            <Text style={styles.cardTitle}>MANAGE ATTENDANCE</Text>
+
+            <TouchableOpacity style={styles.cardBtn}>
+              <Text style={styles.cardBtnText}>My Attendance</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cardBtn}>
+              <Text style={styles.cardBtnText}>Holiday Calendar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cardBtn}>
+              <Text style={styles.cardBtnText}>Regularize Attendance</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
-      {/* Content */}
-      <View style={styles.content}>
-        <Text style={styles.subtitle}>Welcome 👋</Text>
+      {/* EXPENSE CARD */}
+      <View style={[styles.card, styles.expenseCard]}>
+        <View style={styles.row}>
+          <Image
+            source={require('../assets/expences-icon.png')}
+            style={styles.cardIcon}
+          />
 
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Get Started</Text>
-        </TouchableOpacity>
+          <View>
+            <Text style={styles.cardTitle}>EXPENSE</Text>
+
+            <TouchableOpacity style={styles.cardBtn}>
+              <Text style={styles.cardBtnText}>Expense Form</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cardBtn}>
+              <Text style={styles.cardBtnText}>Expense Records</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
-
-      {/* Footer */}
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>© 2026 MyApp</Text>
-      </View>
-
-    </SafeAreaProvider>
+    </ScrollView>
   );
 }
+
+export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffd3c1',
+    padding: 15,
   },
 
   header: {
-    padding: width * 0.05,
-    alignItems: 'center',
-  },
-
-  title: {
-    fontSize: width * 0.06, // responsive font
+    fontSize: 22,
     fontWeight: 'bold',
-  },
-
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: width * 0.05,
-  },
-
-  subtitle: {
-    fontSize: width * 0.05,
     marginBottom: 20,
   },
 
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: width * 0.04,
-    paddingHorizontal: width * 0.1,
+  card: {
     borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
   },
 
-  buttonText: {
-    color: '#fff',
-    fontSize: width * 0.045,
+  attendanceCard: {
+    backgroundColor: '#ff5e00',
   },
 
-  footer: {
-    padding: width * 0.04,
+  expenseCard: {
+    backgroundColor: '#ffb300',
+  },
+
+  row: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
 
-  footerText: {
-    fontSize: width * 0.035,
-    color: '#777',
+  cardIcon: {
+    width: 60,
+    height: 60,
+    marginRight: 15,
+    resizeMode: 'contain',
+  },
+
+  cardTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+
+  cardBtn: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    padding: 8,
+    borderRadius: 5,
+    marginBottom: 8,
+  },
+
+  cardBtnText: {
+    color: '#fff',
   },
 });

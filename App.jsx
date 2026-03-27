@@ -3,34 +3,20 @@ import {
   StatusBar,
   StyleSheet,
   useColorScheme,
-  View,
-  Text,
   Image,
+  TouchableOpacity,
 } from 'react-native';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import Location from './src/components/Location';
+// import HomeScreen from './src/screens/HomeScreen';
+// import ProfileScreen from './src/screens/ProfileScreen';
+import LocationScreen from './src/screens/LocationScreen';
+import Login from './src/screens/Login'
 
-function HomeScreen() {
-  return (
-    <View style={styles.center}>
-      <Text>Home Screen</Text>
-    </View>
-  );
-}
-
-function ProfileScreen() {
-  return (
-    <View style={styles.center}>
-      <Text>Profile Screen</Text>
-    </View>
-  );
-}
-
-const Drawer = createDrawerNavigator();
+const Stack = createNativeStackNavigator();
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -39,54 +25,43 @@ function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <AppDrawer />
+        <AppStack />
       </NavigationContainer>
     </SafeAreaProvider>
   );
 }
 
-function AppDrawer() {
+function AppStack() {
   return (
-    <Drawer.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: true,
+    <Stack.Navigator
+      screenOptions={({ navigation }) => ({
+        headerShown: false,
 
-        drawerStyle: {
-          backgroundColor: 'black',
+        headerStyle: {
+          backgroundColor: '#f5e3da',
         },
+        headerTintColor: '#8b3a2b',
 
-        drawerActiveTintColor: '#fff',
-        drawerInactiveTintColor: 'gray',
-
-        drawerIcon: ({ size }) => {
-          let icon;
-
-          if (route.name === 'Home') {
-            icon = require('./src/assets/home-icon.png');
-          } else if (route.name === 'Attendance') {
-            icon = require('./src/assets/attendance-icon.png');
-          } else if (route.name === 'Profile') {
-            icon = require('./src/assets/profile-icon.png');
-          }
-
-          return (
-            <Image
-              source={icon}
-              style={{
-                width: size,
-                height: size,
-                resizeMode: 'contain',
-                tintColor: 'white',
-              }}
-            />
-          );
-        },
+        // headerRight: () => (
+        //   <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+        //     <Image
+        //       source={require('./src/assets/UserImage.png')}
+        //       style={{
+        //         width: 35,
+        //         height: 35,
+        //         borderRadius: 20,
+        //         marginRight: 15,
+        //       }}
+        //     />
+        //   </TouchableOpacity>
+        // ),
       })}
     >
-      <Drawer.Screen name="Home" component={HomeScreen} />
-      <Drawer.Screen name="Attendance" component={Location} />
-      <Drawer.Screen name="Profile" component={ProfileScreen} />
-    </Drawer.Navigator>
+      {/* <Stack.Screen name="Dashboard" component={HomeScreen} /> */}
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Attendance" component={LocationScreen} />
+      {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
+    </Stack.Navigator>
   );
 }
 
