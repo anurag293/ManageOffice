@@ -20,13 +20,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
-        <Text style={styles.subtitle}>Welcome 👋</Text>
-
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Get Started</Text>
-        </TouchableOpacity>
-      </View>
+      
 
       {/* Footer */}
       <View style={styles.footer}>
@@ -40,7 +34,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#04642ff9',
   },
 
   header: {
