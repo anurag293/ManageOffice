@@ -5,24 +5,42 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Image
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { validateLogin } from '../utils/helper';
 
-
-export default function LoginScreen({navigation }) {
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
-  const [email_error, setemail_errors] = useState('');
   const [password, setPassword] = useState('');
-  const [password_error, setpassword_errors] = useState('');
+  const [errors, setErrors] = useState({ email: '', password: '' });
+  const [eye, setEye] = useState(false);
 
+  const handleLogin = () => {
+    const validationErrors = validateLogin({ email, password });
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors({
+        email: validationErrors.email || '',
+        password: validationErrors.password || '',
+      });
+      return;
+    }
+
+    setErrors({ email: '', password: '' });
+
+    navigation.navigate('Attendance');
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         <View style={styles.top}>
           <View style={styles.logoCircle}>
-              <Image source={require('../assets/logo.png')} style={styles.image} />
+            <Image
+              source={require('../assets/logo.png')}
+              style={styles.image}
+            />
           </View>
 
           <Text style={styles.title}>VENSYSCO</Text>
@@ -42,32 +60,49 @@ export default function LoginScreen({navigation }) {
               style={styles.input}
             />
           </View>
+          {errors.email ? (
+            <Text style={styles.error}>{errors.email}</Text>
+          ) : null}
 
           {/* Password */}
           <View style={styles.passwordRow}>
             <Text style={styles.label}>PASSWORD</Text>
-            <Text style={styles.forgot}>FORGOT?</Text>
+            {/* <Text style={styles.forgot}>FORGOT?</Text> */}
           </View>
 
           <View style={styles.inputBox}>
             <Text style={styles.icon}>🔒</Text>
             <TextInput
               placeholder="******"
-              secureTextEntry
+              secureTextEntry={!eye}
               value={password}
               onChangeText={setPassword}
               style={styles.input}
             />
-            <Text style={styles.icon}>👁️</Text>
+            <TouchableOpacity onPress={() => setEye(!eye)}>
+              {eye ? (
+                <Image
+                  source={require('../assets/show_eye.png')}
+                  style={styles.icon}
+                />
+              ) : (
+                <Image
+                  source={require('../assets/hide_eye.png')}
+                  style={styles.icon}
+                />
+              )}
+            </TouchableOpacity>
           </View>
-
+          {errors.password ? (
+            <Text style={styles.error}>{errors.password}</Text>
+          ) : null}
           {/* Remember */}
-          <View style={styles.rememberRow}>
+          {/* <View style={styles.rememberRow}>
             <View style={styles.checkbox} />
             <Text style={styles.rememberText}>Keep me signed in</Text>
-          </View>
+          </View> */}
 
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Attendance')}>
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Sign In →</Text>
           </TouchableOpacity>
 
@@ -110,7 +145,7 @@ const styles = StyleSheet.create({
   },
 
   logoCircle: {
-    backgroundColor: '#d83b01',
+    backgroundColor: '#FFFFFF',
     width: 200,
     height: 200,
     borderRadius: 100,
@@ -165,6 +200,8 @@ const styles = StyleSheet.create({
 
   icon: {
     marginHorizontal: 5,
+    height: 25,
+    width: 25,
   },
 
   passwordRow: {
@@ -241,5 +278,11 @@ const styles = StyleSheet.create({
   link: {
     color: '#d83b01',
     fontWeight: '600',
+  },
+  error: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 10,
+    marginLeft: 5,
   },
 });

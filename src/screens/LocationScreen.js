@@ -19,7 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
-const LocationScreen = () => {
+const LocationScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState('');
   const [photo, setPhoto] = useState(null);
@@ -214,6 +214,10 @@ const LocationScreen = () => {
           {/* Button */}
           <TouchableOpacity style={styles.button} onPress={markAttendance}>
             <Text style={styles.buttonText}>Check In/Check Out</Text>
+          </TouchableOpacity>
+      
+         <TouchableOpacity style={styles.button} onPress={() =>navigation.navigate('Login')}>
+            <Text style={styles.buttonText}>Sign Out</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
