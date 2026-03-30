@@ -13,7 +13,7 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   return (
     <SafeAreaProvider style={styles.container}>
-      
+    
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Home</Text>
